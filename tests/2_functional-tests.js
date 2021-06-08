@@ -14,8 +14,8 @@ suite("Functional Tests", function () {
         .request(server)
         .get("/hello")
         .end(function (err, res) {
-          assert.fail(res.status, 200);
-          assert.fail(res.text, "hello Guest");
+          assert.isOk(res.status, 200);
+          assert.equal(res.text, "hello Guest");
           done();
         });
     });
@@ -25,8 +25,8 @@ suite("Functional Tests", function () {
         .request(server)
         .get("/hello?name=xy_z")
         .end(function (err, res) {
-          assert.fail(res.status, 200);
-          assert.fail(res.text, "hello xy_z");
+          assert.isOk(res.status, 200);
+          assert.equal(res.text, "hello xy_z");
           done();
         });
     });
@@ -35,40 +35,55 @@ suite("Functional Tests", function () {
       chai
         .request(server)
         .put("/travellers")
-
+        .send({ "surname": "Colombo" })
+        .set('Accept', 'application/json')
         .end(function (err, res) {
-          assert.fail();
+          assert.equal(res.body.surname, "Colombo");
 
           done();
         });
     });
     // #4
     test('send {surname: "da Verrazzano"}', function (done) {
-      assert.fail();
-
-      done();
+      chai
+        .request(server)
+        .put("/travellers")
+        .send({ "surname": "da Verrazzano" })
+        .set('Accept', 'application/json')
+        .end(function (err, res) {
+          assert.equal(res.body.surname, "da Verrazzano");
+          done();
+        });
     });
   });
 });
 
 const Browser = require("zombie");
+//Browser.localhost('http://localhost:3000')
+const browser = new Browser();
 
 suite("Functional Tests with Zombie.js", function () {
+  suiteSetup(function (done) {
+    return browser.visit('http://localhost:3000', done)
+  }),
 
-  suite('"Famous Italian Explorers" form', function () {
-    // #5
-    test('submit "surname" : "Colombo" - write your e2e test...', function (done) {
-      browser.fill("surname", "Colombo").pressButton("submit", function () {
-        assert.fail();
+    suite('"Famous Italian Explorers" form', function () {
+      // #5
+      test('submit "surname" : "Colombo" - write your e2e test...', function (done) {
 
+        browser.fill('surname', 'colombo');
+        browser.pressButton('submit')
+        browser.assert.success();
         done();
       });
     });
-    // #6
-    test('submit "surname" : "Vespucci" - write your e2e test...', function (done) {
-      assert.fail();
+  // #6
+  test('submit "surname" : "Vespucci" - write your e2e test...', function (done) {
+    browser.fill('surname', 'vespucci');
+    browser.pressButton('submit')
+    browser.assert.success();
 
-      done();
-    });
+    done();
   });
+
 });
